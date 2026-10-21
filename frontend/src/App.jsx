@@ -1,6 +1,6 @@
 import { useEffect, useState } from 'react';
 
-const API_URL = import.meta.env.VITE_API_BASE_URL || '/api/students';
+const API_URL = import.meta.env.VITE_API_BASE_URL || 'https://student-record-management-system-by6h.onrender.com/api/students';
 const EMPTY_FORM = { name: '', rollNumber: '', branch: '', marks: '' };
 
 async function api(path = '', options = {}) {
