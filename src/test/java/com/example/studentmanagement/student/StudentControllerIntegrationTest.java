@@ -2,10 +2,14 @@ package com.example.studentmanagement.student;
 
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.delete;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.options;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.put;
+import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.header;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
+
+import static org.hamcrest.Matchers.containsString;
 
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -22,6 +26,26 @@ class StudentControllerIntegrationTest {
 
     @Autowired
     private MockMvc mockMvc;
+
+    @Test
+    void allowsPreflightFromConfiguredFrontendOnly() throws Exception {
+        String allowedOrigin = "https://student-record-management-system-2385gjm9e-msaanvika2017-4914.vercel.app";
+
+        mockMvc.perform(options("/api/students/1")
+                        .header("Origin", allowedOrigin)
+                        .header("Access-Control-Request-Method", "PUT")
+                        .header("Access-Control-Request-Headers", "Content-Type"))
+                .andExpect(status().isOk())
+                .andExpect(header().string("Access-Control-Allow-Origin", allowedOrigin))
+                .andExpect(header().string("Access-Control-Allow-Methods", containsString("PUT")))
+                .andExpect(header().string("Access-Control-Allow-Headers", containsString("Content-Type")));
+
+        mockMvc.perform(options("/api/students/1")
+                        .header("Origin", "https://untrusted.example")
+                        .header("Access-Control-Request-Method", "PUT")
+                        .header("Access-Control-Request-Headers", "Content-Type"))
+                .andExpect(status().isForbidden());
+    }
 
     @Test
     void supportsCrudAndReturnsExpectedErrors() throws Exception {
